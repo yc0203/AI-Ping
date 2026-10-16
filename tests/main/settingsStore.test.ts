@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SettingsStore } from '../../src/main/settingsStore';
 import { DEFAULT_SETTINGS, type Settings } from '../../src/shared/settings';
 
@@ -28,7 +28,7 @@ describe('SettingsStore', () => {
     const dir = tempDir();
     writeFileSync(join(dir, 'settings.json'), JSON.stringify({ version: 1, volume: 30 })); // a 0.2.1 file: no room keys
     const first = new SettingsStore(dir, 10, 'win', { name: 'darren', color: 3 }).load();
-    await sleep(80);
+    await vi.waitFor(() => expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')).tagColor).toBe(3), { timeout: 3000 });
     const second = new SettingsStore(dir, 10, 'win', { name: 'darren', color: 6 }).load();
     expect([first.tagColor, second.tagColor]).toEqual([3, 3]);
     expect(second.volume).toBe(30);
@@ -37,7 +37,7 @@ describe('SettingsStore', () => {
   it('saves on the very first run too', async () => {
     const dir = tempDir();
     new SettingsStore(dir, 10, 'win', { name: 'darren', color: 2 }).load();
-    await sleep(80);
+    await vi.waitFor(() => expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')).tagColor).toBe(2), { timeout: 3000 });
     expect(new SettingsStore(dir, 10, 'win', { name: 'darren', color: 7 }).load().tagColor).toBe(2);
   });
 
@@ -87,8 +87,8 @@ describe('SettingsStore', () => {
     const dir = tempDir();
     writeFileSync(join(dir, 'settings.json'), JSON.stringify({ version: 1, volume: 30 }));
     new SettingsStore(dir, 10).load();
-    await sleep(80);
-    expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8'))).toMatchObject({ emoteTrigger: 'ctrl', emoteSizePx: 150, customEmotes: [] });
+    await vi.waitFor(() => expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')))
+      .toMatchObject({ emoteTrigger: 'ctrl', emoteSizePx: 150, customEmotes: [] }), { timeout: 3000 });
   });
 
   it('emits change with the normalized value', () => {
@@ -125,8 +125,7 @@ describe('SettingsStore', () => {
     // Well inside the debounce window: an immediate (or ignored-debounce) write would have landed by now.
     await sleep(25);
     expect(existsSync(join(dir, 'settings.json'))).toBe(false);
-    await sleep(150);
-    expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')).volume).toBe(20);
+    await vi.waitFor(() => expect(JSON.parse(readFileSync(join(dir, 'settings.json'), 'utf8')).volume).toBe(20), { timeout: 3000 });
   });
 
   it('still falls back to defaults when the corrupt file cannot be backed up', () => {
