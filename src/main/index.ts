@@ -1,7 +1,10 @@
 import { app, clipboard, dialog, Menu, powerMonitor, screen, shell, systemPreferences } from 'electron';
 import { randomBytes, randomInt } from 'node:crypto';
 import { userInfo } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { AiController } from './aiController';
+import { configureAiFromStdin } from './aiSetup';
+import { Readable } from 'node:stream';
 import { resolveLang, strings, type Strings } from '../shared/i18n';
 import { SETTINGS_CH, type About, type AppStatus } from '../shared/ipc';
 import { hotkeyLabel } from '../shared/keys';
@@ -32,13 +35,41 @@ import { Updater } from './updater';
 
 const ACCESSIBILITY_PANE = 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility';
 
-registerAppScheme();
-app.setAppUserModelId('com.lolping.app');
+// Windows' accelerated compositor can present black surfaces for the full-screen
+// transparent overlay above the panels. Prefer stable software rendering there.
+// Keep an explicit opt-in for diagnosing driver-specific behavior.
+if (process.platform === 'win32' && !process.argv.includes('--enable-gpu')) app.disableHardwareAcceleration();
 
+registerAppScheme();
+app.setName('AI-Ping');
+app.setPath('userData', app.isPackaged ? join(dirname(process.execPath), 'data') : join(app.getAppPath(), 'build/local-data'));
+app.setAppUserModelId('com.aiping.desktop');
+let activeAi: AiController | null = null;
+
+const configuringAi = process.argv.includes('--configure-ai');
 if (!app.requestSingleInstanceLock()) {
-  app.quit();
+  if (configuringAi) {
+    process.stderr.write('Close AI-Ping from its tray menu before configuring AI.\n');
+    app.exit(2);
+  } else app.quit();
+} else if (configuringAi) {
+  void app.whenReady().then(async () => {
+    try {
+      // Packaged Windows GUI executables do not reliably receive stdin. The
+      // installer uses a one-process environment entry, removed before any
+      // Codex child is started. Nothing secret is put in argv or a temp file.
+      const setupInput = process.env.AI_PING_SETUP_CONFIG;
+      delete process.env.AI_PING_SETUP_CONFIG;
+      const message = await configureAiFromStdin(setupInput === undefined ? process.stdin : Readable.from([setupInput]), settingsDir());
+      process.stdout.write(`${message}\n`);
+      app.exit(0);
+    } catch (error) {
+      process.stderr.write(`${error instanceof Error ? error.message : 'AI configuration failed'}\n`);
+      app.exit(1);
+    }
+  });
 } else {
-  app.on('second-instance', () => openSettingsWindow());
+  app.on('second-instance', (_event, argv) => { if (!argv.includes('--configure-ai')) activeAi?.open(); });
   app.on('activate', () => openSettingsWindow()); // macOS: opened again from Finder or Launchpad while running
   void app.whenReady().then(start);
 }
@@ -67,7 +98,7 @@ function setMacMenu(): void {
   Menu.setApplicationMenu(Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'windowMenu' }]));
 }
 
-function start(): void {
+async function start(): Promise<void> {
   const library = new EmoteLibrary(join(settingsDir(), 'emotes'));
   serveAppScheme({
     rendererRoot: process.env.ELECTRON_RENDERER_URL ? null : join(__dirname, '../renderer'), // development pages come from Vite
@@ -91,10 +122,12 @@ function start(): void {
   const overlays = new OverlayManager(overlaySettings(settings), (ref, remote) => resolveEmoteArt(ref, settings.customEmotes, remote));
   overlays.start();
   const bridge = new InputBridge({ command: helperExePath() });
+  const ai = activeAi = new AiController(overlays, on => bridge.send({ type: 'suspend', on: on || capturing }));
+  await ai.start();
 
   // Updates: only in an installed build, or in a development build pointed at a test server with LOLPING_UPDATE_TEST_URL.
   const testUrl = process.env.LOLPING_UPDATE_TEST_URL || undefined;
-  const updater = app.isPackaged || testUrl ? createUpdater() : null;
+  const updater = testUrl ? createUpdater() : null; // This fork must never overwrite itself with an upstream release.
   function createUpdater(): Updater {
     const backend = IS_MAC
       ? new MacBackend({
@@ -199,6 +232,7 @@ function start(): void {
     assetPath('textures', 'generic_ping.png'),
     {
       openSettings: () => openSettingsWindow(),
+      openAi: () => ai.open(),
       setEnabled: (on) => setEnabled(on),
       retryHelper: startHelper,
       quit: () => app.quit(),
@@ -250,6 +284,7 @@ function start(): void {
   overlays.on('displays', pushRoom);
   room.on('remotePing', (p) => overlays.spawnRemote(p));
   overlays.on('shared', (p: SharedPing) => {
+    ai.trigger(p.id, p.displayId);
     const shared = toShared(overlays.numbered(), p.displayId, p.x, p.y);
     if (shared) room.sendPing(p.id, shared);
   });
@@ -302,7 +337,7 @@ function start(): void {
     if (ev.type === 'toggled') setEnabled(ev.enabled);
     else if (ev.type === 'ready') {
       // A restarted helper starts unsuspended: re-apply an active key capture.
-      if (capturing) bridge.send({ type: 'suspend', on: true });
+      if (capturing || ai.selecting) bridge.send({ type: 'suspend', on: true });
     } else if (ev.type === 'error') console.warn('[helper]', ev.code ?? '', ev.message);
     else overlays.handle(ev);
   });
@@ -354,7 +389,7 @@ function start(): void {
     retryHelper: startHelper,
     setCapturing: (on) => {
       capturing = on;
-      bridge.send({ type: 'suspend', on });
+      bridge.send({ type: 'suspend', on: on || ai.selecting });
     },
     openAccessibility: () => {
       systemPreferences.isTrustedAccessibilityClient(true); // adds lolPing to the list and shows the system prompt
@@ -381,7 +416,7 @@ function start(): void {
   onSettingsWindowGone(() => {
     if (!capturing) return;
     capturing = false;
-    bridge.send({ type: 'suspend', on: false });
+    bridge.send({ type: 'suspend', on: ai.selecting });
   });
 
   bridge.send(configCommand(settings, enabled));
@@ -401,6 +436,7 @@ function start(): void {
   }
 
   updater?.start();
+  if (!process.argv.includes('--hidden')) ai.open();
 
   app.on('window-all-closed', () => {
     /* stay running: the overlays are the app */
@@ -409,6 +445,7 @@ function start(): void {
     if (quitting) return;
     quitting = true;
     event.preventDefault();
+    ai.destroy();
     updater?.stop(); // aborts a download and drops a check in flight; an install that is quitting the app is left alone
     room.quit(); // says bye, so the others see "left" instead of waiting for a timeout
     stopWaitingForAccess();

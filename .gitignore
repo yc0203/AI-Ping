@@ -8,3 +8,12 @@ native/hook-helper/build/
 .DS_Store
 tools/extract-assets/.cache/
 tools/extract-assets/__pycache__/
+build/local-*/
+.local/
+data/
+ai-data/
+.env
+.env.*
+*.key
+tools/.codex-smoke.cjs
+**/__pycache__/

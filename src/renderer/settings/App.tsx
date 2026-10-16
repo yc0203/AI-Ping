@@ -142,6 +142,10 @@ function SettingsPage({ settings: s, status, update }: { settings: Settings; sta
         <h1 className="pageTitle">{t.pageTitle}</h1>
         {status.helper === 'noAccess' ? <PermissionCard stale={status.staleAccess === true} /> : null}
         <StatusCard settings={s} status={status} />
+        <div className="card notes">
+          <div className="lbl"><b>AI 标记助手</b><span className="desc">功能绑定、文字提示、自定义图标与音效；支持 API 和本机 Codex。</span></div>
+          <button type="button" onClick={() => void api.openAiPanel()}>打开 AI 面板</button>
+        </div>
 
         <div className="section" id="trigger">{t.navTrigger}</div>
         <SettingRow icon={<Cursor24Regular />} title={t.triggerKey} dim={off}

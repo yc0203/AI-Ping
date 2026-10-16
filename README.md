@@ -1,169 +1,141 @@
-<h1 align="center"><img src="assets/textures/generic_ping.png" width="56" alt=""><br>lolPing</h1>
+# AI-Ping
 
-<p align="center">
-  English | <a href="README.zh-CN.md">简体中文</a>
-</p>
+**标记哪里，就从哪里开始问 AI。**
 
-<p align="center">
-  League of Legends pings and emotes for your whole desktop, on Windows and macOS.<br>
-  Hold <b>Alt</b> (<b>⌥ Option</b> on a Mac), drag, and let go on a ping. The animation pops and the sound plays on top of any app, on any monitor.<br>
-  Hold <b>Ctrl</b> (<b>⌃ Control</b> on a Mac) and drag for the emote wheel: League's emotes, or your own images.
-</p>
+AI-Ping 是一个 Windows 桌面 AI 标记助手：在任何软件中打开轮盘，选择“解释这里”“截图翻译”或“给操作方案”，再框选一块屏幕。答案会在选区旁的置顶小浮窗中显示，可以继续追问、复制答案，也可以展开完整面板。
 
-<p align="center">
-  <a href="https://github.com/darrenprx/lolPing/releases/latest"><b>Download for Windows</b></a> ·
-  <a href="https://github.com/darrenprx/lolPing/releases/latest"><b>Download for Mac</b></a> (Apple Silicon, experimental)
-</p>
+基于 [lolPing](https://github.com/darrenprx/lolPing) v0.5.1 改装，保留原有信号轮盘、透明标记、动画和音效，增加文字提示、截图、翻译及两种可切换的 AI 接入。
 
-<p align="center">
-  <a href="https://github.com/darrenprx/lolPing/actions/workflows/ci.yml"><img src="https://github.com/darrenprx/lolPing/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/darrenprx/lolPing/releases/latest"><img src="https://img.shields.io/github/v/release/darrenprx/lolPing" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/darrenprx/lolPing" alt="MIT license"></a>
-</p>
+![标记和文字提示效果](design/marker-text/preview.png)
 
-<p align="center"><img src="docs/media/demo.gif" width="880" alt="An app freezes with a not-responding dialog, and the ping wheel drops three Enemy Missing pings on it"></p>
+[下载 Windows 便携版](https://github.com/yc0203/AI-Ping/releases/latest) · [让 AI 帮你安装](#让-ai-帮你安装) · [详细安装指引](docs/INSTALL.md) · [MIT 许可证](LICENSE)
 
-Pings and emotes show up in whole-screen capture, so friends watching your Discord or OBS stream see them too. lolPing is a desktop toy: it doesn't read, change or hook into League itself.
+## 能做什么
 
-## Install
-
-### Windows
-
-1. Download `lolPing-Setup-<version>.exe` from the [latest release](https://github.com/darrenprx/lolPing/releases/latest).
-2. Run it. The installer isn't code-signed, so Windows SmartScreen may say "Windows protected your PC". Select **More info**, then **Run anyway**.
-3. lolPing opens its settings and moves to the tray. Hold Alt and drag anywhere to ping.
-
-lolPing is built for Windows 11, 64-bit. Windows 10 may work, but it isn't tested.
-
-### macOS (experimental)
-
-The Mac version needs an Apple Silicon Mac (M1 or later) and macOS 12 or later. It is built and tested automatically, but hasn't had much use on real Macs yet. Please [report](https://github.com/darrenprx/lolPing/issues) anything that doesn't work.
-
-1. Download `lolPing-<version>-arm64.dmg` from the [latest release](https://github.com/darrenprx/lolPing/releases/latest), open it, and drag lolPing into Applications.
-2. Open lolPing. It isn't signed by a registered Apple developer, so macOS says it can't check it for malware. Select **Done**, open **System Settings → Privacy & Security**, scroll down, select **Open Anyway** next to the lolPing message, and confirm.
-   If macOS instead says lolPing "is damaged", run `xattr -dr com.apple.quarantine /Applications/lolPing.app` in Terminal and open it again.
-3. lolPing asks for **Accessibility** access, which it needs to read the mouse and keyboard. Select **Open System Settings** and turn lolPing on. Pinging starts as soon as it's allowed.
-4. lolPing lives in the menu bar. Hold ⌥ Option and drag anywhere to ping.
-
-**After every update**, macOS forgets the Accessibility permission, because the app isn't signed with a fixed developer identity. In **Privacy & Security → Accessibility**, select lolPing, remove it with **–**, then turn it on again. The settings window walks you through it.
-
-### Updating an older version
-
-Updating from v0.4 or earlier: download the new version by hand once. From v0.5 on, lolPing updates itself (see [Updates](#updates)).
-
-## Use
-
-| To | Do this |
+| 功能 | 用法 |
 | --- | --- |
-| Ping | Hold **Alt**, drag, and let go on a slice |
-| Emote | Hold **Ctrl**, drag, and let go on an emote |
-| Cancel | Let go in the centre, right-click, or press **Esc** |
-| Pause or resume pinging | **Ctrl + Alt + P** |
-| Open settings | Click the tray icon |
-| Quit, or restart the input helper | Right-click the tray icon |
+| 解释这里 | 截取一个界面、按钮或报错，让 AI 解释含义和下一步 |
+| 给操作方案 | 截取当前软件界面，描述目标，让 AI 提供操作步骤 |
+| 截图翻译 | 框选包含外语的区域，识别并翻译文字 |
+| 划词翻译 | 在目标软件选择文字后翻译；读取失败可改用截图 |
+| 仅截图 | 框选后直接复制或保存 PNG，不调用 AI |
+| 就地问答 | 在选区旁的小浮窗看流式答案、追问或复制，无需切回主面板 |
+| 个性化标记 | 自定义每个标记的功能、文字、图标和 WAV／OGG／MP3 音效 |
 
-On a Mac, use **⌥ Option** instead of Alt, **⌃ Control** instead of Ctrl for emotes, **⌃⌥P** to pause, and the ping icon in the menu bar instead of the tray icon.
+“给操作方案”提供建议供你执行，当前版本不代替你点击或操作其他软件。
 
-The wheel, from the top going clockwise: Danger, Push, On My Way, All In, Assist Me, Need Vision, Enemy Missing, Enemy Vision. You can rearrange it and add Bait or Vision Cleared in settings. The emote wheel has 8 slots too, and you pick its emotes in settings.
+## 快速开始
 
-## Settings
+1. 在 [Releases](https://github.com/yc0203/AI-Ping/releases/latest) 下载 `AI-Ping-0.1.0-win-x64.zip` 和校验文件，解压到可写目录。运行包不含个人配置或密钥。
+2. 双击 `AI-Ping.exe`，打开“AI 与标记设置”，选择 **本机 Codex** 或 **API 服务** 并保存。也可以让 AI 使用随包附带的 `tools/configure-ai.ps1` 完成配置。
+3. 默认按住 **Alt + 左键拖动** 打开信号轮盘，选一个功能；热键以原设置面板中的配置为准，也可直接点击 AI 面板的功能按钮。
+4. 截图时**按住左键拖出矩形，松开确认**；Esc 或右键取消。单击不会提交空截图。
+5. 在选区旁的小浮窗预览，点击“发送并解答”。答案在这里流式显示，支持继续追问、Ctrl+Enter 发送、复制、停止、重新框选和展开完整对话。
 
-<img src="docs/media/settings.png" width="760" alt="The lolPing settings window, with sections for trigger, toggle, pings and sound, wheel, emotes, room and app">
+托盘菜单的“AI-Ping 标记助手”可以重新打开面板。关闭面板后程序仍在托盘运行；配置脚本运行前需要从托盘菜单退出程序。
 
-- **Trigger key:** Alt, Ctrl, Shift, Win, Caps Lock, Mouse 4, Mouse 5 or any other key (on a Mac: Option, Control, Shift, Command, Mouse 4, Mouse 5 or any other key). The custom key won't type in other apps while pinging is on.
-- **Alt + click places a ping:** off by default, so ordinary Alt + click shortcuts keep working. The ping is the one in the centre of the wheel editor (Generic unless you change it).
-- **Pause in fullscreen apps:** on by default. A fullscreen game keeps every click — trigger + click does nothing there — and gestures resume on the desktop and on other monitors. Windowed games aren't detected, and with an auto-hiding taskbar only borderless fullscreen counts. Windows only for now.
-- **Enable / disable shortcut:** must include Ctrl, Alt or Win (⌃, ⌥ or ⌘ on a Mac).
-- **Pings and sound:** size, duration, volume, mute and the wheel's tick sound.
-- **Wheel:** drag any ping onto any slice, including Bait and Vision Cleared, or onto the centre to make it the Alt + click ping. Click a ping to preview it. **Reset to default** brings back League's layout.
-- **Emotes:** the emote key (Ctrl by default, or off), **Ctrl + click places an emote** (off by default), emote size, emote sound and the emote wheel, which you edit like the ping wheel. **Add image…**, or dropping a file on the list, adds your own images: PNG, JPG, GIF or WebP, up to 24. Animated ones play on your screen only.
-- **Launch at Windows startup** (**Open at login** on a Mac): starts hidden in the tray or menu bar.
-- **Language:** follows the system display language, or pick English or 简体中文.
+## 让 AI 帮你安装
 
-Settings are saved in `%APPDATA%\lolPing\settings.json` on Windows and `~/Library/Application Support/lolPing/settings.json` on a Mac.
+需要能访问你本机终端和文件的 AI 编程助手，例如 Codex、Claude Code 或 Cursor。把下面一段话复制给它；安装目录可以自行替换。**登录授权和密钥需要你本人提供**，AI 可以完成其余安装、配置和检查，不能凭空替你生成有效凭据。
 
-## Updates
+### 方式一：使用本地 Codex
 
-lolPing checks GitHub for a new version 10 seconds after it starts, then every 6 hours. When there is one, you get a notice on screen, and the tray menu and **Settings → App → About** offer **Update**. It asks first: nothing downloads until you click.
+```text
+请在我的 Windows 电脑上安装并配置 AI-Ping，项目地址：
+https://github.com/yc0203/AI-Ping
+安装目录使用当前工作区下的 AI-Ping。请实际执行，不要只给步骤。
 
-- **Windows:** one click downloads the installer, verifies it, installs it silently into the same folder and restarts lolPing. The settings window opens after the restart.
-- **Mac:** lolPing downloads the disk image to your Downloads folder, verifies it, explains what to do, opens it, and quits. Drag lolPing into Applications, choose **Replace**, open it, and allow Accessibility again.
-- **Check for updates** in the tray menu, or in **Settings → App → About**, checks right away. From the tray, the result (up to date, or what went wrong) appears as a notice on screen.
-- **Check for updates automatically** (Settings → App, on by default) controls the scheduled checks. With it off, lolPing contacts GitHub only when you click **Check for updates** or **Update**.
-- **Privacy:** a check tells GitHub your IP address and lolPing's version, nothing else.
+先读取仓库 README.md 和 docs/INSTALL.md。优先从这个仓库的最新正式 Release
+下载 Windows x64 便携 ZIP 和 SHA256SUMS.txt，核对哈希后解压；目录已有程序时
+先检查并保留 data，不要覆盖个人配置。没有合适的 Release 时按文档从源码构建。
 
-## Ping with friends (rooms)
+AI 使用本机 Codex。检查是否安装了可用的 Codex CLI，以及 codex login status；
+已有登录就复用，不读取或输出 auth.json、登录令牌。没有安装时按照官方文档安装；
+需要浏览器登录或系统安装授权时再让我操作。Windows 如果只有 codex.cmd，
+请找到该 npm 包内对应本机架构的真实 codex.exe，不要把 .cmd 填进 AI-Ping。
 
-Join a room and everyone in it sees your pings on their own screen, at the same spot (scaled to their resolution), with your name under them. Their pings show up on yours. It works between Windows and Mac.
+确认 AI-Ping 已从托盘退出，然后使用随包 tools/configure-ai.ps1：
+-Provider codex -ExePath <AI-Ping.exe完整路径> -CodexPath <codex.exe完整路径>
+模型留空沿用本机默认值，不修改我的全局 Codex 模型或供应商设置。
 
-1. One person opens **Settings → Room** (or the tray menu → **Room**) and clicks **Create room**.
-2. They copy the code, such as `PING-7KQ4M-2HXTR`, and send it to friends.
-3. Each friend copies it and clicks **Join from clipboard** in the tray menu, or pastes it into the Room page and clicks **Join**.
+最后启动 AI-Ping，确认配置写入且本机 Codex 检测成功，检查截图框选和浮窗能打开。
+未实际发送图片请求时，不要声称模型图片能力已验证。请告诉我安装目录、启动入口、
+当前接入方式，以及还有哪些步骤需要我本人完成。
+```
 
-- **Same network:** the first time, Windows asks whether lolPing may use the network: allow it, and set your Wi‑Fi to **Private** (Windows blocks it on Public networks). A Mac asks to find devices on the local network.
-- **Different networks:** with **Allow internet connections** on (the default), friends anywhere join with the same code. Their pings travel through free public [Nostr](https://nostr.com) relays and take a moment longer than on a local network, which is still used whenever it works. Virtual LANs such as ZeroTier or Radmin VPN work too, and Tailscale users simply connect over the internet.
-- A ping lands on the display with the same number (1 is the primary display), or on display 1.
-- **Emotes** travel like pings: friends see yours on their own screen with your name under it. Your own images show as a "?" to friends for now. Friends on v0.4 or older don't see emotes, and the Room page says so under their names.
-- **Mute room**, muting one person, and an **Incoming ping and emote limit** (up to Unlimited, counted for both together) keep the spam under control. Pausing lolPing with the shortcut pauses room pings and emotes too.
-- A room holds up to 8 people. Leave and create a new room to get rid of someone.
-- **Privacy:** pings, emotes and names are end-to-end encrypted with a key made from the room code. People on your network can see your local IP address. With internet connections on, public relays see your IP address, an anonymous room ID and when you send, but never your pings, emotes or name. Turn **Allow internet connections** off to stay on your local network.
+### 方式二：使用其他兼容 API
 
-## Known limitations
+先把下面的地址、模型和协议改成你的服务提供商给出的值；模型必须支持图片输入，才能解释或翻译截图。支持 **Responses** 和 **Chat Completions**，不直接支持其他厂商的专用协议。
 
-- The wheel can't open over windows running as administrator, such as Task Manager. Windows hides their input from normal apps.
-- Exclusive-fullscreen games draw above the overlay.
-- Sharing a single window doesn't include the pings. Share your entire screen instead.
-- While lolPing is on, Ctrl + drag opens the emote wheel instead of copying files or text. Pick another emote key, or turn it off, in Settings → Emotes.
-- On a Mac, the wheel can't open while a secure screen is showing, such as the login window or a password prompt, and Accessibility has to be allowed again after each update.
+```text
+请在我的 Windows 电脑上安装并配置 AI-Ping，项目地址：
+https://github.com/yc0203/AI-Ping
+安装目录使用当前工作区下的 AI-Ping。请先读取 README.md 和 docs/INSTALL.md，
+实际下载安装并配置，而不是只列步骤。优先使用本仓库正式 Release 的 Windows x64
+便携 ZIP，下载后用 SHA256SUMS.txt 校验；没有合适版本再从源码构建。
 
-## Build from source
+这次选择 API 接入：
+Base URL：<替换为服务地址，例如 https://api.example.com/v1>
+模型名称：<替换为服务提供商的视觉模型名称>
+协议：<responses 或 chat，按服务提供商支持情况填写>
 
-You need Node 22.12 or later, plus:
+请检查地址、模型和协议是否完整。API Key 不要让我贴在聊天里，也不要写入代码、
+脚本参数、日志或 Git 仓库；通过配置脚本的隐藏输入让我在本机输入。
+如果我已经在当前进程设置 AI_PING_API_KEY，可使用 -UseEnvironmentKey，
+但不要打印其值，不要擅自从其他软件的密钥文件复制凭据。
 
-- **Windows:** Windows 11 and Visual Studio 2022 or later with the "Desktop development with C++" workload.
-- **macOS:** an Apple Silicon Mac with the Xcode Command Line Tools (`xcode-select --install`). Allow Accessibility for the app that runs `npm run dev` (for example Terminal) so the helper can read input.
+AI-Ping 退出后，使用随包 tools/configure-ai.ps1：
+-Provider api -ExePath <AI-Ping.exe完整路径> -BaseUrl <上面的地址>
+-Model <上面的模型> -ApiMode <上面的协议> -PromptForKey
+它会通过一次性子进程环境变量交给程序，并由系统加密保存。配置时保留已有标记和个性化设置。
 
-```bash
-npm install
-npx install-electron
+最后启动程序。检查选区预览和浮窗；要验证真实 API 时，先使用不含个人信息的示例
+并告知我会发送到哪一家服务。根据实际返回判断是否成功，不把“配置已保存”当作
+“模型调用成功”。给出启动入口和后续切换接入方式的方法。
+```
+
+完整参数、手动安装、源码构建和排错见 [docs/INSTALL.md](docs/INSTALL.md)。
+
+## AI 接入说明
+
+| 接入方式 | 需要什么 | 配置方式 |
+| --- | --- | --- |
+| 本机 Codex | 可运行的 Codex CLI、有效登录或其已有服务配置 | 自动寻找或选择真实 `codex.exe`，模型可留空；保存后检测连接 |
+| 兼容 API | Base URL、视觉模型、可选 API Key | 选择 Responses 或 Chat Completions；远程地址要求 HTTPS，loopback 本机服务可用 HTTP |
+
+本地 Codex 指调用你电脑上的 Codex 进程，**不代表模型一定在本机推理或离线运行**。请求由你的 Codex 配置和所选服务处理；费用、额度和模型能力取决于账户与服务。AI-Ping 不读取或复制 Codex 登录文件，不替你登录。
+
+截图和文字先本地预览，点击发送后才提交。API Key 通过 Electron 的系统加密能力保存；便携程序旁的 `data` 是本机私有数据，不要分享或上传。正常关闭程序后不保留对话记录。Codex 接入使用只读沙箱；应用不会批准工具执行或自动操作电脑。
+
+## 源码开发
+
+要求 Node.js 22+、Windows x64，以及 Visual Studio 2022 Build Tools 的 C++ 桌面工具链。便携 Release 的日常使用不需要这些开发依赖。
+
+```powershell
+git clone https://github.com/yc0203/AI-Ping.git
+cd AI-Ping
+npm ci
 npm run build:helper
+npm run typecheck
+npm test
 npm run dev
 ```
 
-`npx install-electron` downloads the Electron binary that `npm run dev` needs.
+打包安装程序使用 `npm run dist`，输出在 `release/`。仅构建解包运行目录可用 `npm run build` 后执行 `npx electron-builder --win --x64 --dir --publish never`。`npm run package:local` 是本工作区复用相邻官方运行时的辅助命令，不适用于普通新克隆。
 
-| Command | What it does |
-| --- | --- |
-| `npm test` | TypeScript tests, including a protocol test that runs the real helper in `--simulate` mode |
-| `npm run test:helper` | Builds the helper and runs its C++ tests |
-| `npm run typecheck` | Type-checks everything |
-| `npm run dist` | Builds the Windows installer into `release/` |
-| `npm run dist:mac` | Builds the Mac disk image into `release/` (on a Mac) |
-| `npm run dev:site` | Serves a browser demo of the wheel (`site/`) |
-| `npm run media` | Re-records `docs/media/demo.gif` and `docs/media/og.png` from that demo (needs ffmpeg) |
-| `node tools/room-peer/run.mjs <code>` | Joins a room as a fake member that pings at random, to try rooms with one computer; `--relay` joins through the relays and `--emotes` also sends emotes (see [`tools/room-peer`](tools/room-peer)) |
-| `node tools/relay-probe/run.mjs` | Tests which public Nostr relays can carry rooms; it chose the list in `src/main/relays.ts` (see [`tools/relay-probe`](tools/relay-probe)) |
+源码位于 `src`，原生输入辅助程序位于 `native`，测试位于 `tests`。透明文字 PNG 及生成器位于 `assets/labels` 和 `design/marker-text`。开发模式配置位于 `build/local-data`；便携版配置位于程序旁的 `data`。
 
-### Releasing
+## 当前状态与限制
 
-Bump `version` in `package.json`, commit, then push a matching tag such as `v0.2.0`. The Release workflow creates the GitHub release as a draft. The Windows job attaches the installer, `latest.yml` and the installer's `.blockmap`, and the Mac job attaches the disk image. electron-updater needs both `latest.yml` and the `.blockmap` to update installed copies. A last job publishes the release once everything is attached.
+- 第一版以 Windows x64 为主要支持平台。macOS 构建继承自上游，新增 AI 功能尚未经过 macOS 实机验证；macOS 划词尚未实现。
+- Windows 默认使用软件渲染和不透明面板背景，以规避黑块和闪烁；透明标记及动画保留。
+- 划词依次尝试 Windows UI Automation 和复制选区；自绘控件、禁止复制或权限更高的软件可能失败，可以改用截图翻译。尚未验证所有真实软件的划词兼容性。
+- 736 项自动测试、类型检查及生产构建已验证。截图、浮窗、模拟 API 流式回答与追问经过实际 Electron 验证；本机 Codex 登录检测和图片读取已验证。未对所有第三方 API 服务实测。
+- 安装配置脚本对 Codex 检查本机连接；对 API 验证配置格式并加密保存，不会自动发送截图或产生推理请求。
+- Ctrl+Alt+A 面板快捷键遇到占用时，可用托盘菜单或直接运行程序。当前未启用自动更新。
 
-## How it works
+## 致谢与许可证
 
-- **Input:** [`native/hook-helper`](native/hook-helper) is a small C++ process that owns the low-level mouse and keyboard hooks on Windows, or an event tap on macOS. It swallows the Alt + drag so the app underneath never sees it, and talks to Electron in JSON lines over stdin and stdout.
-- **Display:** Electron draws the wheel and pings in one transparent, click-through, always-on-top window per monitor ([`src/renderer/overlay`](src/renderer/overlay)), and plays the sounds through Web Audio.
-- **Rooms:** [`src/main/roomManager.ts`](src/main/roomManager.ts) keeps the room's members and encrypts every message (AES-256-GCM, key from scrypt over the room code). [`src/main/lanTransport.ts`](src/main/lanTransport.ts) carries the encrypted packets over UDP on the local network, and [`src/main/relayTransport.ts`](src/main/relayTransport.ts) through public Nostr relays as ephemeral events.
-- **Updates:** [`src/main/updater.ts`](src/main/updater.ts) runs the schedule and the state the tray and settings show. [`src/main/updateWin.ts`](src/main/updateWin.ts) updates through electron-updater and the `latest.yml` on the release, and [`src/main/updateMac.ts`](src/main/updateMac.ts) reads the GitHub releases API and checks the disk image against its SHA-256.
-- **Settings:** a Fluent UI window ([`src/renderer/settings`](src/renderer/settings)) with Mica on Windows, restyled like System Settings on macOS.
-- **Demo page:** [`site`](site) runs the same overlay code in the browser, with a small input shim in place of the helper. The README GIF is recorded from it.
-- **Design notes:** [docs/design.md](docs/design.md) covers the protocol, the input state machine and the multi-monitor maths. [docs/design-macos.md](docs/design-macos.md) covers the Mac port.
+基于 [darrenprx/lolPing](https://github.com/darrenprx/lolPing)，保留上游版权与 [MIT 许可证](LICENSE)。AI-Ping 的新增代码按相同许可证提供。
 
-## Ping assets
-
-The icons in `assets/textures` and the sounds in `assets/sounds` come from a local League of Legends install. [`tools/extract-assets`](tools/extract-assets) explains how to extract them again after a patch. The emote animations, icons and sounds in `assets/emotes` are © Riot Games too, and `tools/extract-assets --emotes` bakes them from the same install.
-
-## License
-
-The code is under the [MIT license](LICENSE). The ping and emote icons, animations and sounds are © Riot Games and aren't covered by it. If you represent Riot Games and want something removed, please open an issue.
-
-lolPing isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
+英雄联盟图像和音效属于其权利人，代码许可证不授予这些第三方素材的独立版权。详见 [上游说明](docs/upstream-README.md) 中的素材声明。你可以替换为自己的图像和音效。

@@ -24,6 +24,8 @@ function sector(r0: number, r1: number, a0: number, a1: number): string {
 export interface WheelItem {
   key: string;
   icon: string;
+  label?: string;
+  hint?: string;
 }
 
 /**
@@ -38,6 +40,9 @@ export class Wheel {
   private ox = 0;
   private oy = 0;
   private opened = false;
+  private title!: SVGTextElement;
+  private hint!: SVGTextElement;
+  private readonly labels: SVGTextElement[] = [];
 
   constructor(
     private readonly svg: SVGSVGElement,
@@ -55,6 +60,7 @@ export class Wheel {
       const item = items[i];
       if (item) icon.setAttribute('href', item.icon);
       else icon.removeAttribute('href');
+      this.labels[i].textContent = item?.label ?? '';
     });
   }
 
@@ -102,6 +108,8 @@ export class Wheel {
       this.icons[this.hot].classList.remove('hot');
     }
     this.hot = i;
+    this.title.textContent = i >= 0 ? this.items[i]?.label || this.centerLabel : this.centerLabel;
+    this.hint.textContent = i >= 0 ? this.items[i]?.hint ?? '' : '';
     if (i >= 0) {
       this.wedges[i].setAttribute('fill-opacity', '0.55');
       this.icons[i].classList.add('hot');
@@ -141,13 +149,16 @@ export class Wheel {
     slots.forEach((i) => {
       const [ix, iy] = polar(iconR, -90 + i * 45);
       this.icons.push(el('image', { x: ix - iconSize / 2, y: iy - iconSize / 2, width: iconSize, height: iconSize, class: 'icon' }, svg));
+      this.labels.push(el('text', { x: ix, y: iy + iconSize / 2 + 17, 'text-anchor': 'middle', class: 'slotLabel' }, svg));
     });
 
     el('circle', { r: innerR + 4, fill: 'none', stroke: '#1a1a1a', 'stroke-width': 6, opacity: 0.6 }, svg);
     el('circle', { r: innerR, fill: `url(#${id}-core)`, stroke: '#c8aa6e', 'stroke-width': 3 }, svg);
     el('circle', { r: innerR - 7, fill: 'none', stroke: '#8a7448', 'stroke-width': 1, opacity: 0.6 }, svg);
     el('image', { href: this.centerIcon, x: -20, y: -58, width: 40, height: 40, class: 'hub' }, svg);
-    el('text', { x: 0, y: 6, 'text-anchor': 'middle', class: 'centerTxt' }, svg).textContent = this.centerLabel;
+    this.title = el('text', { x: 0, y: 6, 'text-anchor': 'middle', class: 'centerTxt' }, svg);
+    this.title.textContent = this.centerLabel;
+    this.hint = el('text', { x: 0, y: 26, 'text-anchor': 'middle', class: 'actionHint' }, svg);
     el('text', { x: 6, y: 50, 'text-anchor': 'middle', class: 'backTxt' }, svg).textContent = 'BACK';
     const mouse = el('g', { opacity: 0.55, transform: 'translate(-26,40)' }, svg);
     el('rect', { x: 0, y: 0, width: 11, height: 16, rx: 5.5, fill: 'none', stroke: '#6c7a7c', 'stroke-width': 1.3 }, mouse);

@@ -1,14 +1,11 @@
 {
-  "name": "lolping",
-  "productName": "lolPing",
-  "version": "0.5.1",
+  "name": "ai-ping",
+  "productName": "AI-Ping",
+  "version": "0.1.0",
   "private": true,
-  "description": "League of Legends style ping wheel for your Windows and macOS desktop",
-  "author": "Danrui Meng (https://github.com/darrenprx)",
+  "description": "Desktop ping markers with region capture, translation and configurable AI assistance",
+  "author": "AI-Ping contributors; based on lolPing by Danrui Meng",
   "license": "MIT",
-  "homepage": "https://github.com/darrenprx/lolPing#readme",
-  "repository": { "type": "git", "url": "https://github.com/darrenprx/lolPing.git" },
-  "bugs": "https://github.com/darrenprx/lolPing/issues",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -22,7 +19,8 @@
     "dist:mac": "npm run build:helper && electron-vite build && electron-builder --mac --arm64 --publish never",
     "dev:site": "vite --config site/vite.config.ts",
     "build:site": "vite build --config site/vite.config.ts",
-    "media": "npm run build:site && electron tools/capture-media/capture.mjs"
+    "media": "npm run build:site && electron tools/capture-media/capture.mjs",
+    "package:local": "npm run build && node tools/package-ai.mjs"
   },
   "devDependencies": {
     "@fluentui/react-components": "9.74.9",
@@ -46,39 +44,85 @@
     "ws": "8.22.0"
   },
   "build": {
-    "appId": "com.lolping.app",
-    "productName": "lolPing",
-    "directories": { "output": "release", "buildResources": "build" },
-    "files": ["out/**/*", "package.json"],
+    "appId": "com.aiping.desktop",
+    "productName": "AI-Ping",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**/*",
+      "package.json",
+      "LICENSE"
+    ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.ico",
-      "extraResources": [{ "from": "native/hook-helper/build/hook-helper.exe", "to": "hook-helper.exe" }]
+      "extraResources": [
+        {
+          "from": "native/hook-helper/build/hook-helper.exe",
+          "to": "hook-helper.exe"
+        },
+        {
+          "from": "native/text-selection.ps1",
+          "to": "text-selection.ps1"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "lolPing-Setup-${version}.exe",
+      "artifactName": "AI-Ping-Setup-${version}.exe",
       "include": "build/installer.nsh"
     },
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
       "icon": "build/icon.png",
       "category": "public.app-category.utilities",
       "identity": "-",
       "hardenedRuntime": false,
       "extraResources": [
-        { "from": "native/hook-helper/build/hook-helper", "to": "hook-helper" },
-        { "from": "build", "to": ".", "filter": ["tray*Template*.png"] }
+        {
+          "from": "native/hook-helper/build/hook-helper",
+          "to": "hook-helper"
+        },
+        {
+          "from": "build",
+          "to": ".",
+          "filter": [
+            "tray*Template*.png"
+          ]
+        }
       ],
       "extendInfo": {
-        "NSAccessibilityUsageDescription": "lolPing reads the mouse and keyboard to open the ping wheel or the emote wheel when you hold its key and drag.",
-        "NSDownloadsFolderUsageDescription": "lolPing saves update downloads to your Downloads folder.",
-        "NSLocalNetworkUsageDescription": "lolPing finds the other people in your room on the local network and sends them your pings."
+        "NSAccessibilityUsageDescription": "AI-Ping reads the mouse and keyboard to open the ping wheel or the emote wheel when you hold its key and drag.",
+        "NSDownloadsFolderUsageDescription": "AI-Ping saves update downloads to your Downloads folder.",
+        "NSLocalNetworkUsageDescription": "AI-Ping finds the other people in your room on the local network and sends them your pings."
       }
     },
-    "dmg": { "artifactName": "lolPing-${version}-arm64.dmg" },
-    "publish": [{ "provider": "github", "owner": "darrenprx", "repo": "lolPing" }]
-  }
+    "dmg": {
+      "artifactName": "AI-Ping-${version}-arm64.dmg"
+    }
+  },
+  "homepage": "https://github.com/yc0203/AI-Ping#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yc0203/AI-Ping.git"
+  },
+  "bugs": "https://github.com/yc0203/AI-Ping/issues"
 }

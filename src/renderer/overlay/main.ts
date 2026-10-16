@@ -14,6 +14,7 @@ import { spawnPing } from './pingFx';
 import { SoundBank } from './soundBank';
 import { showToast } from './toast';
 import { Wheel, type WheelItem } from './wheel';
+import { ACTION_LABELS, type Bindings } from '../../shared/ai';
 
 const pingLayer = document.getElementById('pings') as HTMLElement;
 const toastLayer = document.getElementById('toasts') as HTMLElement;
@@ -30,6 +31,7 @@ pingLayer.after(emoteLayer);
 const sounds = new SoundBank();
 const stage = new EmoteStage(emoteLayer);
 let settings: OverlaySettings = overlaySettings(DEFAULT_SETTINGS);
+let bindings: Bindings | null = null;
 const [fallbackPing] = pingsFor([DEFAULT_CLICK_PING]);
 const volume = (): number => (settings.muted ? 0 : settings.volume / 100);
 
@@ -39,7 +41,8 @@ const tick = (): void => {
 const pingWheel = new Wheel(pingSvg, 'PING', textureUrl('generic_ping'), tick);
 const emoteWheel = new Wheel(emoteSvg, 'EMOTE', emoteIconUrl(DEFAULT_CLICK_EMOTE), tick);
 
-const pingItem = (p: PingDef): WheelItem => ({ key: p.id, icon: textureUrl(p.icon) });
+const pingItem = (p: PingDef): WheelItem => ({ key: p.id, icon: bindings?.[p.id].icon ?? textureUrl(p.icon),
+  label: bindings?.[p.id].label, hint: bindings?.[p.id].action === 'translate-selection' ? '松开后选择文字' : bindings?.[p.id].action !== 'none' ? '松开后框选区域' : '' });
 
 /** A wheel slot's icon: the bundled emote's, the imported emote's still, or the generic ping for one that isn't known. */
 function emoteItem(ref: EmoteRef): WheelItem {
@@ -65,8 +68,13 @@ function applySettings(s: OverlaySettings): void {
 applySettings(settings);
 
 function ping(def: PingDef, x: number, y: number, tag?: PingTag): void {
-  spawnPing(pingLayer, def, x, y, { sizePx: settings.pingSizePx, durationS: settings.pingDurationS, tag });
-  sounds.play(def.sound, volume());
+  const binding = tag ? undefined : bindings?.[def.id];
+  const captionImage = binding && binding.action !== 'none' && binding.label === ACTION_LABELS[binding.action]
+    ? `../labels/${binding.action}.png` : undefined;
+  spawnPing(pingLayer, def, x, y, { sizePx: settings.pingSizePx, durationS: settings.pingDurationS, tag,
+    caption: binding?.label, captionImage, iconUrl: binding?.icon });
+  if (binding?.sound) { const audio = new Audio(binding.sound); audio.volume = volume(); void audio.play().catch(() => {}); }
+  else sounds.play(def.sound, volume());
 }
 
 function emote(owner: string, art: EmoteArt, x: number, y: number, tag?: PingTag): void {
@@ -77,6 +85,9 @@ function emote(owner: string, art: EmoteArt, x: number, y: number, tag?: PingTag
 const wheelOf = (p: { wheel?: WheelKind }): Wheel => (p.wheel === 'emote' ? emoteWheel : pingWheel);
 
 window.overlay.on('overlay:settings', applySettings);
+window.overlay.on('ai:bindings', value => { bindings = value; applySettings(settings); });
+const aiHint = document.createElement('div'); aiHint.className = 'ai-mode-hint'; aiHint.hidden = true; document.body.append(aiHint);
+window.overlay.on('ai:hint', value => { aiHint.textContent = value; aiHint.hidden = !value; });
 window.overlay.on('wheel:open', (p) => wheelOf(p).open(p.x, p.y));
 window.overlay.on('wheel:move', (p) => wheelOf(p).move(p.x, p.y));
 window.overlay.on('wheel:release', (p) => {

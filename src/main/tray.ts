@@ -11,6 +11,7 @@ export interface MacTrayIcons {
 }
 
 export interface TrayHandlers {
+  openAi?(): void;
   openSettings(): void;
   setEnabled(on: boolean): void;
   retryHelper(): void;
@@ -167,6 +168,7 @@ export class AppTray {
       { label: t.traySettings, click: () => this.handlers.openSettings() },
       { label: t.trayQuit, click: () => this.handlers.quit() },
     );
+    if (this.handlers.openAi) items.unshift({ label: 'AI-Ping 标记助手', click: () => this.handlers.openAi?.() }, { type: 'separator' });
     this.tray.setContextMenu(Menu.buildFromTemplate(items));
   }
 

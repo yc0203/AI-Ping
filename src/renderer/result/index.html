@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>AI-Ping · 快速解答</title><link rel="stylesheet" href="./style.css"></head>
+<body>
+<header><img id="icon" src="../textures/enemy_missing.png" alt=""><div class="heading"><strong id="title">快速解答</strong><small id="provider">AI-Ping</small></div><button id="expand" title="展开完整面板">展开</button><button id="close" aria-label="关闭浮窗，生成中将停止" title="关闭浮窗，生成中将停止">×</button></header>
+<main id="scroll">
+  <details id="context" open><summary id="context-label">所选内容 · 发送前可预览</summary><img id="preview" alt="所选截图" draggable="false" hidden><pre id="selected-text" hidden></pre></details>
+  <div id="image-tools" class="tools"><button id="copy-image">复制截图</button><button id="save-image">保存</button><button id="recapture">重新选择</button></div>
+  <p id="notice" role="status"></p>
+  <section id="reply" hidden><div class="reply-head"><span id="reply-status">AI 回答</span><button id="copy-answer">复制答案</button></div><p id="asked"></p><div id="answer" aria-live="off"></div></section>
+</main>
+<footer>
+  <form id="ask-form"><label id="question-label" for="question">问题或想完成的目标</label><textarea id="question" rows="2" maxlength="20000" placeholder="例如：这一步应该怎么操作？"></textarea><div class="sendbar"><small id="send-note">确认后发送所选内容</small><button id="stop" type="button" hidden>停止</button><button id="send" type="submit" class="primary">发送并解答</button></div></form>
+  <p id="capture-note" hidden>仅截图，不会发送给 AI。可直接复制或保存。</p>
+</footer>
+<script type="module" src="./main.ts"></script></body></html>

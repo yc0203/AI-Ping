@@ -9,6 +9,7 @@ function subscribe<T>(channel: string, cb: (v: T) => void): () => void {
 }
 
 const api: SettingsApi = {
+  openAiPanel: () => ipcRenderer.invoke('ai:open'),
   // Inlined rather than imported: a sandboxed preload can't require a shared chunk.
   platform: process.platform === 'darwin' ? 'mac' : 'win',
   getSettings: () => ipcRenderer.invoke(SETTINGS_CH.get),

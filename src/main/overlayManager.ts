@@ -10,6 +10,7 @@ import type { OverlaySettings } from '../shared/settings';
 import { physicalToLocal, type DisplayMap } from './coords';
 import { numberDisplays, type NumberedDisplay } from './displayNumbers';
 import { IS_MAC, loadPage, preloadPath } from './paths';
+import type { Bindings } from '../shared/ai';
 
 /** A ping the user just placed, in overlay-local CSS px: the room shares these. */
 export interface SharedPing {
@@ -41,6 +42,28 @@ export class OverlayManager extends EventEmitter {
   private numberedList: NumberedDisplay[] = [];
   private wheelDisplay: number | null = null;
   private wheelKind: WheelKind = 'ping';
+  private aiBindings: Bindings | null = null;
+  private visible = true;
+  private readonly readyWindows = new WeakSet<BrowserWindow>();
+
+  updateAi(bindings: Bindings | null): void {
+    this.aiBindings = bindings;
+    for (const id of this.windows.keys()) this.send(id, 'ai:bindings', bindings);
+  }
+  setAiHint(text: string): void {
+    for (const id of this.windows.keys()) this.send(id, 'ai:hint', text);
+  }
+
+  setVisible(visible: boolean): void {
+    // Re-attaching an already visible full-screen transparent surface can flash
+    // black on Windows; cancellation is also called when no capture was active.
+    if (this.visible === visible) return;
+    this.visible = visible;
+    for (const win of this.windows.values()) {
+      if (win.isDestroyed() || !this.readyWindows.has(win)) continue;
+      if (visible) win.showInactive(); else win.hide();
+    }
+  }
 
   /** `resolveArt` says what an emote looks like: `remote` is true for a room member's, whose files may be missing here. */
   constructor(private settings: OverlaySettings, private readonly resolveArt: (ref: EmoteRef, remote: boolean) => EmoteArt) {
@@ -222,10 +245,15 @@ export class OverlayManager extends EventEmitter {
     win.setIgnoreMouseEvents(true);
     win.setAlwaysOnTop(true, 'screen-saver');
     if (IS_MAC) win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
-    win.webContents.on('did-finish-load', () => win.webContents.send('overlay:settings', this.settings));
+    win.webContents.on('did-finish-load', () => {
+      win.webContents.send('overlay:settings', this.settings);
+      win.webContents.send('ai:bindings', this.aiBindings);
+    });
     win.once('ready-to-show', () => {
-      win.showInactive();
+      if (win.isDestroyed()) return;
       win.setBounds(d.bounds); // re-apply: mixed-DPI setups can size the first frame wrong
+      this.readyWindows.add(win);
+      if (this.visible) win.showInactive();
     });
     void loadPage(win, 'overlay');
     return win;

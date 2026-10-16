@@ -45,12 +45,12 @@ jobs:
           CSC_FOR_PULL_REQUEST: true
       - name: Check the app bundle
         run: |
-          app="release/mac-arm64/lolPing.app"
+          app="release/mac-arm64/AI-Ping.app"
           codesign --verify --deep --strict --verbose=2 "$app"
           file "$app/Contents/Resources/hook-helper" | grep -q arm64
           test -f "$app/Contents/Resources/trayTemplate@2x.png"
       - uses: actions/upload-artifact@v4
         with:
-          name: lolPing-mac-arm64
+          name: AI-Ping-mac-arm64
           path: release/*.dmg
           retention-days: 14

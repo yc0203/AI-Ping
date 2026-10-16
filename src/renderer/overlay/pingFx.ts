@@ -10,6 +10,9 @@ export interface PingFxOptions {
   durationS: number;
   /** A room member's name under the ping. */
   tag?: PingTag;
+  caption?: string;
+  captionImage?: string;
+  iconUrl?: string;
 }
 
 function img(name: string, cls = ''): HTMLImageElement {
@@ -40,16 +43,25 @@ export function spawnPing(layer: HTMLElement, def: PingDef, x: number, y: number
   root.append(div('ground'), div('ring'), div('ring r2'), div('ring r3'));
 
   const art = div('art');
-  if (def.art.length === 2) {
+  if (def.art.length === 2 && !opts.iconUrl) {
     const clash = div('clash');
     clash.append(img(def.art[0], 'a1'), img(def.art[1], 'a2'));
     art.append(clash, div('flash'));
   } else {
     const pop = div('pop');
-    pop.append(img(def.art[0]));
+    const image = img(def.art[0]);
+    if (opts.iconUrl) image.src = opts.iconUrl;
+    pop.append(image);
     art.append(pop);
   }
   root.append(art);
+  if (opts.caption) {
+    const caption = div('action-caption');
+    if (opts.captionImage) {
+      const image = document.createElement('img'); image.src = opts.captionImage; image.alt = opts.caption; caption.append(image);
+    } else caption.textContent = opts.caption;
+    root.append(caption);
+  }
   if (opts.tag) {
     const tag = div('tag');
     tag.textContent = opts.tag.name; // never HTML: the name comes from another machine

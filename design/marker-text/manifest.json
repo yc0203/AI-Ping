@@ -1,0 +1,37 @@
+[
+  {
+    "id": "explain",
+    "text": "解释这里",
+    "texture": "enemy_missing",
+    "color": "#f2c518",
+    "label": "explain.png"
+  },
+  {
+    "id": "plan",
+    "text": "给操作方案",
+    "texture": "assist_me",
+    "color": "#56d43c",
+    "label": "plan.png"
+  },
+  {
+    "id": "translate-screen",
+    "text": "截图翻译",
+    "texture": "need_vision",
+    "color": "#56d43c",
+    "label": "translate-screen.png"
+  },
+  {
+    "id": "translate-selection",
+    "text": "划词翻译",
+    "texture": "omw",
+    "color": "#2e8bff",
+    "label": "translate-selection.png"
+  },
+  {
+    "id": "capture",
+    "text": "仅截图",
+    "texture": "pingwheel_basicpingrender",
+    "color": "#2e8bff",
+    "label": "capture.png"
+  }
+]

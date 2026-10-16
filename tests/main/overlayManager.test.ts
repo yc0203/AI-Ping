@@ -4,7 +4,10 @@ import { OVERLAY_EMOTED, OVERLAY_PINGED } from '../../src/shared/ipc';
 import { DEFAULT_SETTINGS, overlaySettings } from '../../src/shared/settings';
 
 const h = vi.hoisted(() => ({
-  windows: [] as Array<{ x: number; webContents: { send: ReturnType<typeof vi.fn> } }>,
+  windows: [] as Array<{
+    x: number; webContents: { send: ReturnType<typeof vi.fn> };
+    emit(event: string): boolean; showInactive: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn>;
+  }>,
   handlers: new Map<string, (event: unknown, raw: unknown) => void>(),
 }));
 
@@ -24,7 +27,8 @@ vi.mock('electron', async () => {
     setIgnoreMouseEvents(): void {}
     setAlwaysOnTop(): void {}
     setBounds(): void {}
-    showInactive(): void {}
+    showInactive = vi.fn();
+    hide = vi.fn();
     isDestroyed(): boolean {
       return false;
     }
@@ -62,10 +66,51 @@ beforeEach(async () => {
   h.windows.length = 0;
   h.handlers.clear();
   vi.resetModules();
+  const { screen } = await import('electron');
+  screen.removeAllListeners();
   const { OverlayManager } = await import('../../src/main/overlayManager');
   resolveArt = vi.fn(art);
   mgr = new OverlayManager(overlaySettings({ ...DEFAULT_SETTINGS, clickEmoteId: 'okay' }), resolveArt);
   mgr.start();
+});
+
+describe('OverlayManager visibility', () => {
+  it('does not re-show an already visible overlay during cancellation', () => {
+    for (const w of h.windows) w.emit('ready-to-show');
+    mgr.setVisible(true);
+    mgr.setVisible(true);
+    for (const w of h.windows) expect(w.showInactive).toHaveBeenCalledTimes(1);
+  });
+
+  it('only changes visibility when a capture begins or ends', () => {
+    for (const w of h.windows) w.emit('ready-to-show');
+    mgr.setVisible(false); mgr.setVisible(false);
+    mgr.setVisible(true); mgr.setVisible(true);
+    for (const w of h.windows) {
+      expect(w.hide).toHaveBeenCalledTimes(1);
+      expect(w.showInactive).toHaveBeenCalledTimes(2);
+    }
+  });
+
+  it('keeps overlays hidden if a capture starts before their first paint', () => {
+    mgr.setVisible(false);
+    for (const w of h.windows) {
+      expect(w.hide).not.toHaveBeenCalled();
+      w.emit('ready-to-show');
+      expect(w.showInactive).not.toHaveBeenCalled();
+    }
+    mgr.setVisible(true);
+    for (const w of h.windows) expect(w.showInactive).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show an unpainted overlay when a capture is cancelled early', () => {
+    mgr.setVisible(false); mgr.setVisible(true);
+    for (const w of h.windows) {
+      expect(w.showInactive).not.toHaveBeenCalled();
+      w.emit('ready-to-show');
+      expect(w.showInactive).toHaveBeenCalledTimes(1);
+    }
+  });
 });
 
 describe('OverlayManager wheels', () => {

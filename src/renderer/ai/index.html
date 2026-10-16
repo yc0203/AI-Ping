@@ -1,0 +1,17 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; media-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'">
+<title>AI-Ping · 标记助手</title><link rel="stylesheet" href="./style.css"></head><body>
+<header><img src="../textures/enemy_missing.png" alt=""><div><strong>AI-Ping</strong><small>标记哪里，就从哪里开始</small></div><nav aria-label="面板"><button id="chat-tab" aria-selected="true">截图与解答</button><button id="settings-tab" aria-selected="false">AI 与标记设置</button></nav></header>
+<main><section id="chat-panel"><div class="intro"><h1>先选功能，再选区域</h1><p>Alt + 左键拖动打开轮盘。也可以点击下面的功能开始。</p></div>
+<div id="actions" class="actions"></div><div id="notice" role="status" class="notice"></div>
+<section id="context" class="context" hidden><div class="context-head"><h2 id="context-title">当前内容</h2><div><button id="copy-image">复制截图</button><button id="save-image">保存截图</button></div></div><img id="screenshot" alt="你所选的截图"><pre id="selected-text"></pre><p>点击发送后，所选内容将交给当前 AI 服务。追问沿用此内容。</p></section>
+<div id="messages" aria-live="polite" class="messages"></div>
+<form id="ask-form"><label for="question">问题或想完成的目标</label><textarea id="question" rows="3" placeholder="例如：这里报错是什么意思？我该怎样解决？"></textarea><div class="sendbar"><small id="provider-note"></small><button type="button" id="stop">停止</button><button type="submit" id="send" class="primary">发送</button></div></form></section>
+<section id="settings-panel" hidden><h1>AI 与标记设置</h1><p class="muted">修改后点击保存。标记图标、声音和功能可以分别配置。</p>
+<form id="settings-form"><div class="settings-group"><h2>AI 服务</h2><label class="toggle"><input type="checkbox" id="enabled">启用标记功能与文字提示</label>
+<label>接入方式<select id="provider"><option value="codex">本机 Codex</option><option value="api">API 服务</option></select></label>
+<div id="codex-fields"><label>Codex 路径<input id="codex-path" placeholder="留空自动寻找本机 Codex"></label><div class="row"><button type="button" id="pick-codex">选择 codex.exe</button><button type="button" id="check-codex">检测登录与连接</button></div><label>Codex 模型<input id="codex-model" placeholder="留空使用本机默认模型"></label><p class="muted">使用本机 Codex 的登录状态及额度；本程序不会替你登录。检测连接前请先保存路径。</p></div>
+<div id="api-fields" hidden><label>API 地址<input id="base-url" placeholder="https://api.openai.com/v1"></label><label>协议<select id="api-mode"><option value="responses">OpenAI Responses</option><option value="chat">Chat Completions 兼容接口</option></select></label><label>模型名称<input id="model" placeholder="填写服务提供的模型名称，截图需支持图片输入"></label><label>API 密钥<input id="key" type="password" autocomplete="off" placeholder="留空保留已保存的密钥"></label><label class="toggle"><input type="checkbox" id="clear-key">清除已保存的密钥</label><p id="key-status" class="muted"></p></div>
+<label>回答／翻译语言<input id="language" placeholder="简体中文"></label></div>
+<div class="settings-group"><h2>标记绑定与个性化</h2><p class="muted">图片会转换成透明 PNG 并套用原版动画。音效支持 WAV、OGG、MP3；表情仍在原设置中配置。</p><div id="bindings"></div></div>
+<div class="savebar"><span id="settings-status" role="status"></span><button type="submit" class="primary">保存设置</button></div></form></section></main><script type="module" src="./main.ts"></script></body></html>

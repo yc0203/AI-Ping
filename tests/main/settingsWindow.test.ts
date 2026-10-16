@@ -14,7 +14,7 @@ vi.mock('electron', async () => {
   class FakeWindow extends Emitter {
     webContents = new FakeContents();
     destroyed = false;
-    constructor() {
+    constructor(readonly options: Record<string, any>) {
       super();
       windows.push(this);
     }
@@ -58,6 +58,14 @@ beforeEach(async () => {
 });
 
 describe('onSettingsWindowGone', () => {
+  it('uses an opaque, unthrottled Windows panel rather than a transparent Mica surface', () => {
+    mod.openSettingsWindow();
+    const { options } = windows[0] as { options: Record<string, any> };
+    expect(options.backgroundColor).toBe('#f3f3f3');
+    expect(options.backgroundMaterial).toBeUndefined();
+    expect(options.webPreferences.backgroundThrottling).toBe(false);
+  });
+
   it('fires when the window closes', () => {
     const cb = vi.fn();
     mod.onSettingsWindowGone(cb);

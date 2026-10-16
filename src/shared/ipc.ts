@@ -5,6 +5,7 @@ import type { HelperStatus, WheelKind } from './protocol';
 import type { JoinResult, RoomState } from './room';
 import type { OverlaySettings, Settings } from './settings';
 import type { UpdateState } from './update';
+import type { Bindings } from './ai';
 
 export interface Point {
   x: number;
@@ -19,6 +20,8 @@ export interface PingTag {
 
 /** main → overlay renderer messages. Points are CSS pixels inside that overlay. */
 export interface OverlayEvents {
+  'ai:bindings': Bindings | null;
+  'ai:hint': string;
   'overlay:settings': OverlaySettings;
   /** `wheel` names the wheel the gesture belongs to; missing means 'ping' (the site demo leaves it out). */
   'wheel:open': Point & { wheel?: WheelKind };
@@ -37,7 +40,7 @@ export type OverlayChannel = keyof OverlayEvents;
 
 export const OVERLAY_CHANNELS: readonly OverlayChannel[] = [
   'overlay:settings', 'wheel:open', 'wheel:move', 'wheel:release', 'wheel:cancel', 'ping:spawn', 'emote:spawn', 'emote:clear',
-  'toast:show',
+  'toast:show', 'ai:bindings', 'ai:hint',
 ];
 
 /** overlay renderer → main: string[] of asset files that failed to load. */
@@ -71,6 +74,7 @@ export { SETTINGS_CH } from './settingsChannels';
 
 /** window.settingsApi in the settings renderer. */
 export interface SettingsApi {
+  openAiPanel(): Promise<void>;
   readonly platform: Platform;
   getSettings(): Promise<Settings>;
   setSettings(patch: Partial<Settings>): Promise<SetSettingsResult>;
